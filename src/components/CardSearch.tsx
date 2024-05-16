@@ -1,7 +1,18 @@
 import React, { useState } from "react";
 import axios from 'axios';
 
-import { Button, TextField, Box, Typography, Grid, Drawer, Backdrop, Checkbox, FormControlLabel, FormGroup } from "@mui/material";
+import {
+    Button,
+    TextField,
+    Box,
+    Typography,
+    Grid,
+    Drawer,
+    Backdrop,
+    Checkbox,
+    FormControlLabel,
+    FormGroup
+} from "@mui/material";
 import { Card } from "./types";
 import DeckList from "./DeckList";
 import { useNavigate } from 'react-router-dom';
@@ -22,6 +33,8 @@ const CardSearch: React.FC = () => {
         red: false,
         green: false
     });
+    const [nextPage, setNextPage] = useState<string | null>(null);
+    const [loadingMore, setLoadingMore] = useState<boolean>(false);
 
 
     const handleColorChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,8 +47,10 @@ const CardSearch: React.FC = () => {
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
-        const isPlainCardName = /^[a-zA-Z\s]+$/.test(searchQuery.trim());
+        setNextPage(null);
+        setLoadingMore(false);
 
+        const isPlainCardName = /^[a-zA-Z\s]+$/.test(searchQuery.trim());
         let query = isPlainCardName
             ? `name:"${encodeURIComponent(searchQuery.trim())}"`
             : encodeURIComponent(searchQuery.trim());
@@ -51,14 +66,33 @@ const CardSearch: React.FC = () => {
                 name: card.name,
                 imageUrl: card.image_uris?.normal || card.image_uris?.small || '',
             }));
-            console.log(response);
             setCards(cardResults);
+            setNextPage(response.data.next_page || null);
             setError('');
         } catch (error) {
             setCards([]);
             setError('Error fetching card data. Please try again.');
         }
     }
+
+    const loadMoreResults = async () => {
+        if (!nextPage) return;
+        setLoadingMore(true);
+        try {
+            const response = await axios.get(nextPage);
+            const fetchedCards: Card[] = response.data.data.map((card: any) => ({
+                name: card.name,
+                imageUrl: card.image_uris?.normal || card.image_uris?.small || '',
+                details: card
+            }));
+            setCards((prevResults) => [...prevResults, ...fetchedCards]);
+            setNextPage(response.data.next_page || null);
+        } catch (error) {
+            setError('Error fetching more card data. Please try again.');
+        } finally {
+            setLoadingMore(false);
+        }
+    };
 
     const handleAddCard = (card: Card) => {
         setSelectedCards([...selectedCards, card]);
@@ -137,13 +171,20 @@ const CardSearch: React.FC = () => {
                                 onClick={() => handleCardClick(card.name)}
                             />
                             <Typography variant="subtitle1">{card.name}</Typography>
-                            <Button variant="contained" color="success" onClick={() => handleAddCard(card)}>
+                            <Button variant="contained" color="success" onClick={(e) => { e.stopPropagation(); handleAddCard(card) }}>
                                 Add to Deck
                             </Button>
                         </div>
                     </Grid>
                 ))}
             </Grid>
+
+            {nextPage && (
+                <Button onClick={loadMoreResults} variant="contained" color="primary" disabled={loadingMore}
+                    style={{ position: 'fixed', bottom: 60, right: 16}}>
+                    {loadingMore ? 'Loading...' : 'Load More'}
+                </Button>
+            )}
 
             <Button onClick={toggleDrawer(true)}
                 style={{ position: 'fixed', bottom: 16, right: 16 }}
