@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from 'axios';
 
-import { Button, TextField, Box, Typography, Grid, Drawer, Backdrop, IconButton } from "@mui/material";
+import { Button, TextField, Box, Typography, Grid, Drawer, Backdrop, Checkbox, FormControlLabel, FormGroup } from "@mui/material";
 import { Card } from "./types";
 import DeckList from "./DeckList";
 import { useNavigate } from 'react-router-dom';
@@ -15,19 +15,38 @@ const CardSearch: React.FC = () => {
     const [error, setError] = useState<string>('');
     const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
     const navigate = useNavigate();
+    const [selectedColors, setSelectedColors] = useState<{ [color: string]: boolean }>({
+        white: false,
+        blue: false,
+        black: false,
+        red: false,
+        green: false
+    });
 
+
+    const handleColorChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setSelectedColors({
+            ...selectedColors,
+            [event.target.name]: event.target.checked
+        });
+    };
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
         const isPlainCardName = /^[a-zA-Z\s]+$/.test(searchQuery.trim());
 
-        const query = isPlainCardName
+        let query = isPlainCardName
             ? `name:"${encodeURIComponent(searchQuery.trim())}"`
             : encodeURIComponent(searchQuery.trim());
 
+        const colors = Object.keys(selectedColors).filter(color => selectedColors[color]);
+        if (colors.length > 0) {
+            query += `+color<=${colors.join('')}`;
+        }
         try {
             const response = await axios.get(`https://api.scryfall.com/cards/search?q=${query}`);
+            console.log(response);
             const cardResults: Card[] = response.data.data.map((card: any) => ({
                 name: card.name,
                 imageUrl: card.image_uris?.normal || card.image_uris?.small || '',
@@ -93,6 +112,15 @@ const CardSearch: React.FC = () => {
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
+                    <FormGroup row>
+                        {['white', 'blue', 'black', 'red', 'green'].map((color) => (
+                            <FormControlLabel
+                                control={<Checkbox checked={selectedColors[color]} onChange={handleColorChange} name={color} />}
+                                label={color.charAt(0).toUpperCase() + color.slice(1)}
+                                key={color}
+                            />
+                        ))}
+                    </FormGroup>
                     <Button variant="contained" type="submit">Search</Button>
                 </Box>
                 {error && <Typography color="error">{error}</Typography>}
