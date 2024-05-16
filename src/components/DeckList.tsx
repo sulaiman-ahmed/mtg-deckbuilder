@@ -18,12 +18,13 @@ const DeckList: React.FC<DeckListProps> = ({ cards, onRemoveCard }) => {
     }
 
     return (
-        <Box m={2}>
-            <Typography variant="h5">
+        <Box m={2} mb={5}>            
+            <Typography variant="h5" display="flex" justifyContent="space-between">
                 Current Decklist
-                <Button onClick={exportDeck} variant="outlined" color="primary" style={{ marginLeft: '10px' }}>
+                <Button onClick={exportDeck} variant="contained" color="primary" style={{ marginLeft: "10px" }}>
                     Export
-                </Button></Typography>
+                </Button>
+            </Typography>
             <Typography variant="subtitle1">Total cards: {cards.length}</Typography>
             <Grid container spacing={2}>
                 {cards.map((card, index) => (

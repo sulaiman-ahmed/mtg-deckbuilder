@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from 'axios';
 
-import { Button, TextField, Box, Typography, Grid } from "@mui/material";
+import { Button, TextField, Box, Typography, Grid, Drawer, Backdrop, IconButton } from "@mui/material";
 import { Card } from "./types";
 import DeckList from "./DeckList";
 import { useNavigate } from 'react-router-dom';
@@ -13,6 +13,7 @@ const CardSearch: React.FC = () => {
     const [cards, setCards] = useState<Card[]>([]);
     const [selectedCards, setSelectedCards] = useState<Card[]>([]);
     const [error, setError] = useState<string>('');
+    const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
     const navigate = useNavigate();
 
 
@@ -52,6 +53,22 @@ const CardSearch: React.FC = () => {
         navigate(`/card/${encodeURIComponent(cardName)}`);
     };
 
+    const toggleDrawer = (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
+        if (
+            event.type === 'keydown' &&
+            ((event as React.KeyboardEvent).key === 'Tab' ||
+                (event as React.KeyboardEvent).key === 'Shift')
+        ) {
+            return;
+        }
+
+        setDrawerOpen(open);
+    };
+
+    const stopPropagation = (event: React.MouseEvent) => {
+        event.stopPropagation();
+    };
+
 
     return (
         <>
@@ -71,7 +88,7 @@ const CardSearch: React.FC = () => {
                 >
                     <TextField
                         id="outlined-basic"
-                        label="Card name..."
+                        label="Search for a card"
                         variant="outlined"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
@@ -100,8 +117,34 @@ const CardSearch: React.FC = () => {
                 ))}
             </Grid>
 
-            {selectedCards.length > 0 && <DeckList cards={selectedCards} onRemoveCard={handleRemoveCard} />}
+            <Button onClick={toggleDrawer(true)}
+                style={{ position: 'fixed', bottom: 16, right: 16 }}
+                variant="contained"
+            >
+                Current DeckList
+            </Button>
 
+            <Backdrop
+                open={drawerOpen}
+                sx={{ zIndex: (theme) => theme.zIndex.drawer - 1 }}
+                onClick={toggleDrawer(false)}
+            />
+
+            <Drawer
+                anchor="bottom"
+                open={drawerOpen}
+                onClose={toggleDrawer(false)}
+                variant="persistent"
+                PaperProps={{ sx: { maxHeight: '80vh' } }}
+            >
+                <div
+                    role="presentation"
+                    onClick={stopPropagation}
+                    onKeyDown={toggleDrawer(false)}
+                >
+                    <DeckList cards={selectedCards} onRemoveCard={handleRemoveCard} />
+                </div>
+            </Drawer>
         </>
 
     )

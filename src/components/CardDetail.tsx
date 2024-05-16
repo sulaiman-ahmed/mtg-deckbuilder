@@ -4,13 +4,11 @@ import axios from 'axios';
 import { Card, CardInformation } from './types';
 import { Typography, CircularProgress, Box, Paper, styled } from '@mui/material';
 
-const InfoPaper = styled(Paper) (({ theme }) => ({
+const InfoPaper = styled(Paper)(({ theme }) => ({
     width: "40%",
     padding: theme.spacing(2),
     ...theme.typography.body2,
-  }));{
-
-}
+}));
 
 const CardDetail: React.FC = () => {
     const { cardName } = useParams();
@@ -58,7 +56,7 @@ const CardDetail: React.FC = () => {
                 <Typography variant="h4">{card.name}</Typography>
                 <InfoPaper>
                     {card.details?.oracle_text}
-                     {/* Add more details from the card here */}
+                    {/* Add more details from the card here */}
                 </InfoPaper>
             </Box>
         </div>
