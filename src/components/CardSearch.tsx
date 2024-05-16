@@ -4,6 +4,8 @@ import axios from 'axios';
 import { Button, TextField, Box, Typography, Grid } from "@mui/material";
 import { Card } from "./types";
 import DeckList from "./DeckList";
+import { useNavigate } from 'react-router-dom';
+
 
 const CardSearch: React.FC = () => {
 
@@ -11,6 +13,8 @@ const CardSearch: React.FC = () => {
     const [cards, setCards] = useState<Card[]>([]);
     const [selectedCards, setSelectedCards] = useState<Card[]>([]);
     const [error, setError] = useState<string>('');
+    const navigate = useNavigate();
+
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -26,7 +30,6 @@ const CardSearch: React.FC = () => {
             const cardResults: Card[] = response.data.data.map((card: any) => ({
                 name: card.name,
                 imageUrl: card.image_uris?.normal || card.image_uris?.small || '',
-                colors: card.colors
             }));
             console.log(response);
             setCards(cardResults);
@@ -43,6 +46,10 @@ const CardSearch: React.FC = () => {
 
     const handleRemoveCard = (index: number) => {
         setSelectedCards((prevCards) => prevCards.filter((_, i) => i !== index));
+    };
+
+    const handleCardClick = (cardName: string) => {
+        navigate(`/card/${encodeURIComponent(cardName)}`);
     };
 
 
@@ -78,7 +85,12 @@ const CardSearch: React.FC = () => {
                 {cards.map((card, index) => (
                     <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
                         <div>
-                            <img src={card.imageUrl} alt={card.name} style={{ width: '80%', height: 'auto' }} />
+                            <img
+                                src={card.imageUrl}
+                                alt={card.name}
+                                style={{ width: '80%', height: 'auto', cursor: "pointer" }}
+                                onClick={() => handleCardClick(card.name)}
+                            />
                             <Typography variant="subtitle1">{card.name}</Typography>
                             <Button variant="contained" color="success" onClick={() => handleAddCard(card)}>
                                 Add to Deck
