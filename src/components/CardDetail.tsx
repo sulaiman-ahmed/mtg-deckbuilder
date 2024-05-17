@@ -23,7 +23,7 @@ const CardDetail: React.FC = () => {
                 const fetchedCardDetails: CardInformation = response.data;
                 const fetchedCard: Card = {
                     name: response.data.name,
-                    imageUrl: response.data.image_uris?.normal || response.data.image_uris?.small || '',
+                    imageUrl: [response.data.image_uris?.normal] || [response.data.image_uris?.small] || [],
                     details: fetchedCardDetails
                 };
                 setCard(fetchedCard);
@@ -51,13 +51,16 @@ const CardDetail: React.FC = () => {
 
     return (
         <div>
-            <Box m={2}>
-                <img src={card.imageUrl} alt={card.name} style={{ width: '20%', height: 'auto' }} />
-                <Typography variant="h4">{card.name}</Typography>
-                <InfoPaper>
-                    {card.details?.oracle_text}
-                    {/* Add more details from the card here */}
-                </InfoPaper>
+            <Box m={2} gap={4} display='flex'>
+                <img src={card.imageUrl[0]} alt={card.name} style={{ width: '20%', height: 'auto' }} />
+                <Box>
+                    <Typography variant="h4">{card.name} - {card.details?.color_identity}</Typography>
+                    <InfoPaper>
+                        {card.details?.oracle_text}
+                        {/* Add more details from the card here */}
+                    </InfoPaper>
+                </Box>
+
             </Box>
         </div>
     );

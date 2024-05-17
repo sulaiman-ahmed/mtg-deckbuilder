@@ -27,11 +27,11 @@ const CardSearch: React.FC = () => {
     const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
     const navigate = useNavigate();
     const [selectedColors, setSelectedColors] = useState<{ [color: string]: boolean }>({
-        white: false,
-        blue: false,
-        black: false,
-        red: false,
-        green: false
+        W: false,
+        U: false,
+        B: false,
+        R: false,
+        G: false
     });
     const [nextPage, setNextPage] = useState<string | null>(null);
     const [loadingMore, setLoadingMore] = useState<boolean>(false);
@@ -49,29 +49,33 @@ const CardSearch: React.FC = () => {
 
         setNextPage(null);
         setLoadingMore(false);
+        let query = "";
 
         const isPlainCardName = /^[a-zA-Z\s]+$/.test(searchQuery.trim());
-        let query = isPlainCardName
+        query = isPlainCardName
             ? `name:"${encodeURIComponent(searchQuery.trim())}"`
             : encodeURIComponent(searchQuery.trim());
 
         const colors = Object.keys(selectedColors).filter(color => selectedColors[color]);
         if (colors.length > 0) {
-            query += `+color<=${colors.join('')}`;
+            query += `+color=${colors.join('')}`;
         }
+        console.log(query);
         try {
             const response = await axios.get(`https://api.scryfall.com/cards/search?q=${query}`);
-            console.log(response);
+            console.log(response.data.data);
             const cardResults: Card[] = response.data.data.map((card: any) => ({
                 name: card.name,
-                imageUrl: card.image_uris?.normal || card.image_uris?.small || '',
+                imageUrl: card.card_faces ? card.card_faces.map((face: any) => face.image_uris?.normal || face.image_uris?.small || '')  : [card.image_uris?.normal] || [card.image_uris?.small] || [],
+                details: card
             }));
             setCards(cardResults);
             setNextPage(response.data.next_page || null);
             setError('');
-        } catch (error) {
+        } catch (error: any) {
             setCards([]);
-            setError('Error fetching card data. Please try again.');
+            //setError('Error fetching card data. Please try again.');
+            setError(error.toString());
         }
     }
 
@@ -147,7 +151,7 @@ const CardSearch: React.FC = () => {
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
                     <FormGroup row>
-                        {['white', 'blue', 'black', 'red', 'green'].map((color) => (
+                        {['W', 'U', 'B', 'R', 'G'].map((color) => (
                             <FormControlLabel
                                 control={<Checkbox checked={selectedColors[color]} onChange={handleColorChange} name={color} />}
                                 label={color.charAt(0).toUpperCase() + color.slice(1)}
@@ -165,11 +169,13 @@ const CardSearch: React.FC = () => {
                     <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
                         <div>
                             <img
-                                src={card.imageUrl}
+                                src={card.imageUrl[0]}
                                 alt={card.name}
                                 style={{ width: '80%', height: 'auto', cursor: "pointer" }}
                                 onClick={() => handleCardClick(card.name)}
                             />
+
+
                             <Typography variant="subtitle1">{card.name}</Typography>
                             <Button variant="contained" color="success" onClick={(e) => { e.stopPropagation(); handleAddCard(card) }}>
                                 Add to Deck
@@ -181,7 +187,7 @@ const CardSearch: React.FC = () => {
 
             {nextPage && (
                 <Button onClick={loadMoreResults} variant="contained" color="primary" disabled={loadingMore}
-                    style={{ position: 'fixed', bottom: 60, right: 16}}>
+                    style={{ position: 'fixed', bottom: 60, right: 16 }}>
                     {loadingMore ? 'Loading...' : 'Load More'}
                 </Button>
             )}

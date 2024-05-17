@@ -18,7 +18,7 @@ const DeckList: React.FC<DeckListProps> = ({ cards, onRemoveCard }) => {
     }
 
     return (
-        <Box m={2} mb={5}>            
+        <Box m={2} mb={5}>
             <Typography variant="h5" display="flex" justifyContent="space-between">
                 Current Decklist
                 <Button onClick={exportDeck} variant="contained" color="primary" style={{ marginLeft: "10px" }}>
@@ -30,7 +30,8 @@ const DeckList: React.FC<DeckListProps> = ({ cards, onRemoveCard }) => {
                 {cards.map((card, index) => (
                     <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
                         <Box>
-                            <img src={card.imageUrl} alt={card.name} style={{ maxWidth: '80%', height: 'auto' }} />
+                            <img src={card.imageUrl[0]} alt={card.name} style={{ maxWidth: '80%', height: 'auto' }} />
+
                             <Typography variant="subtitle1">{card.name}</Typography>
                             <Button variant="contained" color="error" onClick={() => onRemoveCard(index)}>Remove</Button>
                         </Box>
