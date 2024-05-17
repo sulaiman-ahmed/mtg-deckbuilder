@@ -1,7 +1,8 @@
 export interface Card {
-    name: string;
-    imageUrl: string[];
-    details?: CardInformation;
+  name: string;
+  imageUrl: string[];
+  details?: CardInformation;
+  count: number;
 }
 
 export interface CardInformation {
@@ -21,6 +22,7 @@ export interface CardInformation {
 }
 
 export interface DeckListProps {
-    cards: Card[]
-    onRemoveCard: (index: number) => void;
+  totalCards: number;
+  cards: Card[]
+  onRemoveCard: (index: number) => void;
 }

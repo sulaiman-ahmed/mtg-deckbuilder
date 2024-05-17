@@ -25,6 +25,7 @@ const CardSearch: React.FC = () => {
     const [selectedCards, setSelectedCards] = useState<Card[]>([]);
     const [error, setError] = useState<string>('');
     const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
+    const [totalCards, setTotalCards] = useState<number>(0);
     const navigate = useNavigate();
     const [selectedColors, setSelectedColors] = useState<{ [color: string]: boolean }>({
         W: false,
@@ -86,8 +87,9 @@ const CardSearch: React.FC = () => {
             const response = await axios.get(nextPage);
             const fetchedCards: Card[] = response.data.data.map((card: any) => ({
                 name: card.name,
-                imageUrl: card.image_uris?.normal || card.image_uris?.small || '',
-                details: card
+                imageUrl: card.card_faces ? card.card_faces.map((face: any) => face.image_uris?.normal || face.image_uris?.small || '')  : [card.image_uris?.normal] || [card.image_uris?.small] || [],
+                details: card,
+                count: 1
             }));
             setCards((prevResults) => [...prevResults, ...fetchedCards]);
             setNextPage(response.data.next_page || null);
@@ -99,12 +101,34 @@ const CardSearch: React.FC = () => {
     };
 
     const handleAddCard = (card: Card) => {
-        setSelectedCards([...selectedCards, card]);
-    };
+        setSelectedCards((prevCards) => {
+          const existingCardIndex = prevCards.findIndex(c => c.name === card.name);
+          if (existingCardIndex !== -1) {
+            const updatedCards = [...prevCards];
+            updatedCards[existingCardIndex].count += 1;
+            return updatedCards;
+          } else {
+            card.count = 1;
+            return [...prevCards, card];
+          }
+        });
 
-    const handleRemoveCard = (index: number) => {
-        setSelectedCards((prevCards) => prevCards.filter((_, i) => i !== index));
-    };
+        setTotalCards(totalCards + 1);
+      };
+    
+      const handleRemoveCard = (index: number) => {
+        setSelectedCards((prevCards) => {
+          const updatedCards = [...prevCards];
+          if (updatedCards[index].count > 1) {
+            updatedCards[index].count -= 1;
+          } else {
+            updatedCards.splice(index, 1);
+          }
+          return updatedCards;
+        });
+
+        setTotalCards(totalCards - 1);
+      };
 
     const handleCardClick = (cardName: string) => {
         navigate(`/card/${encodeURIComponent(cardName)}`);
@@ -217,7 +241,7 @@ const CardSearch: React.FC = () => {
                     onClick={stopPropagation}
                     onKeyDown={toggleDrawer(false)}
                 >
-                    <DeckList cards={selectedCards} onRemoveCard={handleRemoveCard} />
+                    <DeckList cards={selectedCards} onRemoveCard={handleRemoveCard} totalCards={totalCards}/>
                 </div>
             </Drawer>
         </>

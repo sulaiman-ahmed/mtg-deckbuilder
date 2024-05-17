@@ -24,7 +24,8 @@ const CardDetail: React.FC = () => {
                 const fetchedCard: Card = {
                     name: response.data.name,
                     imageUrl: [response.data.image_uris?.normal] || [response.data.image_uris?.small] || [],
-                    details: fetchedCardDetails
+                    details: fetchedCardDetails,
+                    count: 1
                 };
                 setCard(fetchedCard);
                 setLoading(false);
