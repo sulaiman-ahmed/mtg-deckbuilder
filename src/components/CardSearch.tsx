@@ -84,13 +84,14 @@ const CardSearch: React.FC = () => {
         }
         try {
             const response = await axios.get(`https://api.scryfall.com/cards/search?q=${query}`);
-            const cardResults: Card[] = response.data.data.map((card: any) => ({
+            const cardResults: Card[] = response.data.data.filter((card: any) => !card.digital).map((card: any) => ({
                 name: card.name,
                 imageUrl: card.card_faces ? card.card_faces.map((face: any) => face.image_uris?.normal || face.image_uris?.small || '') : [card.image_uris?.normal] || [card.image_uris?.small] || [],
                 details: card,
                 colors: card.color_identity,
                 cmc: card.cmc
             }));
+
             setCards(cardResults);
             setNextPage(response.data.next_page || null);
             setError('');
@@ -106,7 +107,7 @@ const CardSearch: React.FC = () => {
         setLoadingMore(true);
         try {
             const response = await axios.get(nextPage);
-            const fetchedCards: Card[] = response.data.data.map((card: any) => ({
+            const fetchedCards: Card[] = response.data.data.filter((card: any) => !card.digital).map((card: any) => ({
                 name: card.name,
                 imageUrl: card.card_faces ? card.card_faces.map((face: any) => face.image_uris?.normal || face.image_uris?.small || '') : [card.image_uris?.normal] || [card.image_uris?.small] || [],
                 details: card,

@@ -23,7 +23,7 @@ const CardDetail: React.FC = () => {
                 const fetchedCardDetails: CardInformation = response.data;
                 const fetchedCard: Card = {
                     name: response.data.name,
-                    imageUrl: [response.data.image_uris?.normal] || [response.data.image_uris?.small] || [],
+                    imageUrl: response.data.card_faces ? response.data.card_faces.map((face: any) => face.image_uris?.normal || face.image_uris?.small || '') : [response.data.image_uris?.normal] || [response.data.image_uris?.small] || [],
                     details: fetchedCardDetails,
                     count: 1,
                     colors: response.data.colors,
