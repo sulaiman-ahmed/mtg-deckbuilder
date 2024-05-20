@@ -25,7 +25,8 @@ const CardDetail: React.FC = () => {
                     name: response.data.name,
                     imageUrl: [response.data.image_uris?.normal] || [response.data.image_uris?.small] || [],
                     details: fetchedCardDetails,
-                    count: 1
+                    count: 1,
+                    colors: response.data.colors
                 };
                 setCard(fetchedCard);
                 setLoading(false);

@@ -3,6 +3,7 @@ export interface Card {
   imageUrl: string[];
   details?: CardInformation;
   count: number;
+  colors: string[];
 }
 
 export interface CardInformation {
