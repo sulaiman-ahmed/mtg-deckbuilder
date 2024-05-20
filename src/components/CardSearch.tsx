@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from 'axios';
-
+import Cookies from "js-cookie";
 import {
     Button,
     TextField,
@@ -37,6 +37,27 @@ const CardSearch: React.FC = () => {
     const [nextPage, setNextPage] = useState<string | null>(null);
     const [loadingMore, setLoadingMore] = useState<boolean>(false);
 
+    useEffect(() => {
+        const savedQuery = Cookies.get('searchQuery');
+        const savedResults = Cookies.get('cards');
+        const savedScrollPos = Cookies.get('scrollPosition');
+        if (savedQuery) {
+            setSearchQuery(savedQuery);
+        }
+        if (savedResults) {
+            setCards(JSON.parse(savedResults));
+        }
+        if (savedScrollPos) {
+            window.scrollTo(0, parseInt(savedScrollPos, 10));
+        }
+    }, []);
+
+
+    useEffect(() => {
+        Cookies.set('searchQuery', searchQuery, { expires: 1 });
+        Cookies.set('cards', JSON.stringify(cards), { expires: 1 });
+    }, [searchQuery, cards]);
+
 
     const handleColorChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSelectedColors({
@@ -67,7 +88,7 @@ const CardSearch: React.FC = () => {
             console.log(response.data.data);
             const cardResults: Card[] = response.data.data.map((card: any) => ({
                 name: card.name,
-                imageUrl: card.card_faces ? card.card_faces.map((face: any) => face.image_uris?.normal || face.image_uris?.small || '')  : [card.image_uris?.normal] || [card.image_uris?.small] || [],
+                imageUrl: card.card_faces ? card.card_faces.map((face: any) => face.image_uris?.normal || face.image_uris?.small || '') : [card.image_uris?.normal] || [card.image_uris?.small] || [],
                 details: card
             }));
             setCards(cardResults);
@@ -87,7 +108,7 @@ const CardSearch: React.FC = () => {
             const response = await axios.get(nextPage);
             const fetchedCards: Card[] = response.data.data.map((card: any) => ({
                 name: card.name,
-                imageUrl: card.card_faces ? card.card_faces.map((face: any) => face.image_uris?.normal || face.image_uris?.small || '')  : [card.image_uris?.normal] || [card.image_uris?.small] || [],
+                imageUrl: card.card_faces ? card.card_faces.map((face: any) => face.image_uris?.normal || face.image_uris?.small || '') : [card.image_uris?.normal] || [card.image_uris?.small] || [],
                 details: card,
                 count: 1
             }));
@@ -102,35 +123,36 @@ const CardSearch: React.FC = () => {
 
     const handleAddCard = (card: Card) => {
         setSelectedCards((prevCards) => {
-          const existingCardIndex = prevCards.findIndex(c => c.name === card.name);
-          if (existingCardIndex !== -1) {
-            const updatedCards = [...prevCards];
-            updatedCards[existingCardIndex].count += 1;
-            return updatedCards;
-          } else {
-            card.count = 1;
-            return [...prevCards, card];
-          }
+            const existingCardIndex = prevCards.findIndex(c => c.name === card.name);
+            if (existingCardIndex !== -1) {
+                const updatedCards = [...prevCards];
+                updatedCards[existingCardIndex].count += 1;
+                return updatedCards;
+            } else {
+                card.count = 1;
+                return [...prevCards, card];
+            }
         });
 
         setTotalCards(totalCards + 1);
-      };
-    
-      const handleRemoveCard = (index: number) => {
+    };
+
+    const handleRemoveCard = (index: number) => {
         setSelectedCards((prevCards) => {
-          const updatedCards = [...prevCards];
-          if (updatedCards[index].count > 1) {
-            updatedCards[index].count -= 1;
-          } else {
-            updatedCards.splice(index, 1);
-          }
-          return updatedCards;
+            const updatedCards = [...prevCards];
+            if (updatedCards[index].count > 1) {
+                updatedCards[index].count -= 1;
+            } else {
+                updatedCards.splice(index, 1);
+            }
+            return updatedCards;
         });
 
         setTotalCards(totalCards - 1);
-      };
+    };
 
     const handleCardClick = (cardName: string) => {
+        Cookies.set('scrollPosition', window.scrollY.toString(), { expires: 1 });
         navigate(`/card/${encodeURIComponent(cardName)}`);
     };
 
@@ -241,7 +263,7 @@ const CardSearch: React.FC = () => {
                     onClick={stopPropagation}
                     onKeyDown={toggleDrawer(false)}
                 >
-                    <DeckList cards={selectedCards} onRemoveCard={handleRemoveCard} totalCards={totalCards}/>
+                    <DeckList cards={selectedCards} onRemoveCard={handleRemoveCard} totalCards={totalCards} />
                 </div>
             </Drawer>
         </>
