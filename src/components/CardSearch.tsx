@@ -88,7 +88,8 @@ const CardSearch: React.FC = () => {
                 name: card.name,
                 imageUrl: card.card_faces ? card.card_faces.map((face: any) => face.image_uris?.normal || face.image_uris?.small || '') : [card.image_uris?.normal] || [card.image_uris?.small] || [],
                 details: card,
-                colors: card.color_identity
+                colors: card.color_identity,
+                cmc: card.cmc
             }));
             setCards(cardResults);
             setNextPage(response.data.next_page || null);
@@ -110,7 +111,8 @@ const CardSearch: React.FC = () => {
                 imageUrl: card.card_faces ? card.card_faces.map((face: any) => face.image_uris?.normal || face.image_uris?.small || '') : [card.image_uris?.normal] || [card.image_uris?.small] || [],
                 details: card,
                 count: 1,
-                colors: card.color_identity
+                colors: card.color_identity,
+                cmc: card.cmc,
             }));
             setCards((prevResults) => [...prevResults, ...fetchedCards]);
             setNextPage(response.data.next_page || null);
