@@ -11,7 +11,8 @@ import {
     Backdrop,
     Checkbox,
     FormControlLabel,
-    FormGroup
+    FormGroup,
+    Modal
 } from "@mui/material";
 import { Card } from "./types";
 import DeckList from "./DeckList";
@@ -36,6 +37,9 @@ const CardSearch: React.FC = () => {
     });
     const [nextPage, setNextPage] = useState<string | null>(null);
     const [loadingMore, setLoadingMore] = useState<boolean>(false);
+    const [addModalOpen, setAddModalOpen] = useState(false);
+    const [currCard, setCurrCard] = useState<Card | null>(null);
+    const [multipleCount, setMultipleCount] = useState(1);
 
     useEffect(() => {
         const savedQuery = Cookies.get('searchQuery');
@@ -140,6 +144,35 @@ const CardSearch: React.FC = () => {
         setTotalCards(totalCards + 1);
     };
 
+    const handleAddMultipleCards = (card: Card, count: number) => {
+        setSelectedCards(prevCards => {
+            const existingCardIndex = prevCards.findIndex(c => c.name === card.name);
+            if (existingCardIndex !== -1) {
+                const updatedCards = [...prevCards];
+                updatedCards[existingCardIndex].count += count;
+                return updatedCards;
+            }
+            return [...prevCards, { ...card, count }];
+        });
+    };
+
+    const handleOpenModal = (card: Card) => {
+        setCurrCard(card);
+        setAddModalOpen(true);
+    };
+
+    const handleCloseModal = () => {
+        setAddModalOpen(false);
+        setMultipleCount(1);
+    };
+
+    const handleAddMultipleSubmit = () => {
+        if (currCard) {
+            handleAddMultipleCards(currCard, multipleCount);
+            handleCloseModal();
+        }
+    };
+
     const handleRemoveCard = (index: number) => {
         setSelectedCards((prevCards) => {
             const updatedCards = [...prevCards];
@@ -213,22 +246,27 @@ const CardSearch: React.FC = () => {
                 {error && <Typography color="error">{error}</Typography>}
             </Box>
 
-            <Grid container spacing={2} m={2}>
+            <Grid container spacing={2} p={1}>
                 {cards.map((card, index) => (
-                    <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
+                    <Grid item xs={6} sm={4} md={3} lg={2} key={index}>
                         <div>
                             <img
                                 src={card.imageUrl[0]}
                                 alt={card.name}
-                                style={{ width: '80%', height: 'auto', cursor: "pointer" }}
+                                style={{ width: '100%', height: 'auto', cursor: "pointer" }}
                                 onClick={() => handleCardClick(card.name)}
                             />
 
 
                             <Typography variant="subtitle1">{card.name}</Typography>
-                            <Button variant="contained" color="success" onClick={(e) => { e.stopPropagation(); handleAddCard(card) }}>
-                                Add to Deck
-                            </Button>
+                            <Box display="flex" justifyContent="space-between">
+                                <Button variant="contained" color="success" onClick={(e) => { e.stopPropagation(); handleAddCard(card) }}>
+                                    Add to Deck
+                                </Button>
+                                <Button variant="contained" color="primary" onClick={() => handleOpenModal(card)}>
+                                    Add Multiple
+                                </Button>
+                            </Box>
                         </div>
                     </Grid>
                 ))}
@@ -269,6 +307,46 @@ const CardSearch: React.FC = () => {
                     <DeckList cards={selectedCards} onRemoveCard={handleRemoveCard} totalCards={totalCards} />
                 </div>
             </Drawer>
+            <Modal
+                open={addModalOpen}
+                onClose={handleCloseModal}
+                aria-labelledby="add-multiple-modal-title"
+                aria-describedby="add-multiple-modal-description"
+            >
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        width: 400,
+                        bgcolor: 'background.paper',
+                        border: '2px solid #000',
+                        boxShadow: 24,
+                        p: 4,
+                    }}
+                >
+                    <Typography id="add-multiple-modal-title" variant="h6" component="h2">
+                        Add Multiple Copies
+                    </Typography>
+                    <TextField
+                        id="add-multiple-modal-description"
+                        label="Number of Copies"
+                        type="number"
+                        value={multipleCount}
+                        onChange={(e) => setMultipleCount(Number(e.target.value))}
+                        fullWidth
+                    />
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleAddMultipleSubmit}
+                        style={{ marginTop: '20px' }}
+                    >
+                        Add to Deck
+                    </Button>
+                </Box>
+            </Modal>
         </>
 
     )
