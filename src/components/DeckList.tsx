@@ -36,10 +36,9 @@ const DeckList: React.FC<DeckListProps> = ({ cards, onRemoveCard, totalCards }) 
             <CardTypeBarChart cards={cards} /> 
             <Grid container spacing={2}>
                 {cards.map((card, index) => (
-                    <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
+                    <Grid item xs={6} sm={4} md={3} lg={2} key={index}>
                         <Box>
-                            <img src={card.imageUrl[0]} alt={card.name} style={{ maxWidth: '80%', height: 'auto' }} />
-
+                            <img src={card.imageUrl[0]} alt={card.name} style={{ maxWidth: '100%', height: 'auto' }} />
                             <Typography variant="subtitle1">{card.name} x{card.count}</Typography>
                             <Button variant="contained" color="error" onClick={() => onRemoveCard(index)}>Remove</Button>
                         </Box>

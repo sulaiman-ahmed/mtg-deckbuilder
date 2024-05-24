@@ -1,6 +1,6 @@
 // src/CardTypeBarChart.tsx
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, CartesianGrid, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from 'recharts';
 import { Card } from './types';
 
 interface CardTypeBarChartProps {
@@ -65,7 +65,6 @@ const CardTypeBarChart: React.FC<CardTypeBarChartProps> = ({ cards }) => {
         <XAxis dataKey="type" />
         <YAxis />
         <Tooltip />
-        <Legend />
         <Bar dataKey="count" fill="#8884d8" />
       </BarChart>
     </ResponsiveContainer>
