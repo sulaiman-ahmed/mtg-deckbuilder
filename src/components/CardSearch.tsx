@@ -155,6 +155,9 @@ const CardSearch: React.FC = () => {
             }
             return [...prevCards, { ...card, count }];
         });
+
+        setTotalCards(totalCards + count);
+
     };
 
     const handleOpenModal = (card: Card) => {
