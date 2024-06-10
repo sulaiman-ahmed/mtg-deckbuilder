@@ -18,7 +18,8 @@ import {
 import { Card } from "./types";
 import DeckList from "./DeckList";
 import { useNavigate } from 'react-router-dom';
-
+import AddBoxIcon from '@mui/icons-material/AddBox';
+import AddToPhotosIcon from '@mui/icons-material/AddToPhotos';
 
 const CardSearch: React.FC = () => {
 
@@ -159,6 +160,9 @@ const CardSearch: React.FC = () => {
             }
             return [...prevCards, { ...card, count }];
         });
+
+        setTotalCards(totalCards + count);
+
     };
 
     const handleOpenModal = (card: Card) => {
@@ -324,14 +328,12 @@ const CardSearch: React.FC = () => {
                                 style={{ width: '100%', height: 'auto', cursor: "pointer" }}
                                 onClick={() => handleCardClick(card.name)}
                             />
-
-
                             <Typography variant="subtitle1">{card.name}</Typography>
                             <Box display="flex" justifyContent="space-between">
-                                <Button variant="contained" color="success" onClick={(e) => { e.stopPropagation(); handleAddCard(card) }}>
+                                <Button variant="contained" color="success" style={{fontSize: 10}} onClick={(e) => { e.stopPropagation(); handleAddCard(card) }}>
                                     Add to Deck
                                 </Button>
-                                <Button variant="contained" color="primary" onClick={() => handleOpenModal(card)}>
+                                <Button variant="contained" color="primary" style={{fontSize: 10}} onClick={() => handleOpenModal(card)}>
                                     Add Multiple
                                 </Button>
                             </Box>
