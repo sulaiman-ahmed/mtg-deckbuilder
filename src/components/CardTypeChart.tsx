@@ -20,7 +20,7 @@ const CardTypeBarChart: React.FC<CardTypeBarChartProps> = ({ cards }) => {
 
   cards.forEach((card) => {
     const types = card.details?.type_line.split(' — ')[0].split(' ');
-    types?.forEach((type) => {
+    types?.forEach((type: any) => {
       switch (type) {
         case 'Land':
           typeCategories.Land++;
