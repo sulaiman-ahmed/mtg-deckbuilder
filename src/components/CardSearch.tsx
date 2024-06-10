@@ -12,7 +12,8 @@ import {
     Checkbox,
     FormControlLabel,
     FormGroup,
-    Modal
+    Modal,
+    TextareaAutosize
 } from "@mui/material";
 import { Card } from "./types";
 import DeckList from "./DeckList";
@@ -40,6 +41,10 @@ const CardSearch: React.FC = () => {
     const [addModalOpen, setAddModalOpen] = useState(false);
     const [currCard, setCurrCard] = useState<Card | null>(null);
     const [multipleCount, setMultipleCount] = useState(1);
+    const [importModalOpen, setImportModalOpen] = useState(false);
+    const [importText, setImportText] = useState('');
+
+
 
     useEffect(() => {
         const savedQuery = Cookies.get('searchQuery');
@@ -208,6 +213,66 @@ const CardSearch: React.FC = () => {
         event.stopPropagation();
     };
 
+    const handleOpenImportModal = () => {
+        setImportModalOpen(true);
+    };
+
+    const handleCloseImportModal = () => {
+        setImportModalOpen(false);
+        setImportText('');
+    };
+
+    const handleImportSubmit = async () => {
+        const lines = importText.split('\n')
+            .map(line => line.trim())
+            .filter(line => line.length > 0);
+        let totalImportedCards = 0;
+        const newCards: { name: string; count: number }[] = lines.map(line => {
+            const [count, ...nameParts] = line.split(' ');
+            const name = nameParts.join(' ');
+            totalImportedCards += parseInt(count, 10);
+            console.log(totalImportedCards);
+            return { name, count: parseInt(count, 10) };
+        });
+        setTotalCards(totalCards + totalImportedCards);
+
+        const fetchedCards = await Promise.all(newCards.map(async ({ name, count }) => {
+            try {
+                const response = await axios.get(`https://api.scryfall.com/cards/named?exact=${encodeURIComponent(name)}`);
+                const card = response.data;
+                return {
+                    name: card.name,
+                    imageUrl: card.card_faces ? card.card_faces.map((face: any) => face.image_uris?.normal || face.image_uris?.small || '') : [card.image_uris?.normal] || [card.image_uris?.small] || [],
+                    details: card,
+                    count,
+                    colors: card.color_identity,
+                    cmc: card.cmc,
+                };
+            } catch (error) {
+                console.error(`Error fetching card ${name}:`, error);
+                return null;
+            }
+        }));
+
+        setSelectedCards(prevCards => {
+            const updatedCards = [...prevCards];
+            fetchedCards.forEach(card => {
+                if (card) {
+                    const existingCardIndex = updatedCards.findIndex(c => c.name === card.name);
+                    if (existingCardIndex != -1) {
+                        updatedCards[existingCardIndex].count += card.count;
+                    } else {
+                        updatedCards.push(card);
+                    }
+                }
+            });
+
+            return updatedCards;
+        });
+
+        handleCloseImportModal();
+    };
+
 
     return (
         <>
@@ -242,6 +307,9 @@ const CardSearch: React.FC = () => {
                         ))}
                     </FormGroup>
                     <Button variant="contained" type="submit">Search</Button>
+                    <Button variant="contained" color="primary" onClick={handleOpenImportModal}>
+                        Import List
+                    </Button>
                 </Box>
                 {error && <Typography color="error">{error}</Typography>}
             </Box>
@@ -344,6 +412,33 @@ const CardSearch: React.FC = () => {
                         style={{ marginTop: '20px' }}
                     >
                         Add to Deck
+                    </Button>
+                </Box>
+            </Modal>
+            <Modal open={importModalOpen} onClose={handleCloseImportModal}>
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        width: 400,
+                        bgcolor: 'background.paper',
+                        boxShadow: 24,
+                        p: 4,
+                    }}
+                >
+                    <Typography variant="h6">Import Card List</Typography>
+                    <TextareaAutosize
+                        minRows={10}
+                        maxRows={15}
+                        placeholder="1 Arcane Signet&#10;1 Command Tower"
+                        style={{ width: '100%', resize: 'none', overflowY: 'scroll' }}
+                        value={importText}
+                        onChange={(e) => setImportText(e.target.value)}
+                    />
+                    <Button onClick={handleImportSubmit} variant="contained" color="primary" sx={{ mt: 2 }}>
+                        Import
                     </Button>
                 </Box>
             </Modal>

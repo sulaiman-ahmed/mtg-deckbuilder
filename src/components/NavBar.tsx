@@ -14,7 +14,7 @@ const Navbar: React.FC = () => {
             <AppBar position="static">
                 <Toolbar>
                     <Typography variant="h6" style={{ flexGrow: 1 }}>
-                        HELP I NEED A NAME SOMEONE NAME ME
+                        Mana Muse
                     </Typography>
                     <Button color="inherit" component={Link} to="/">
                         Home

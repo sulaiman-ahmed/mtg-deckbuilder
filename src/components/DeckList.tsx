@@ -1,9 +1,7 @@
 import React from "react";
 import { DeckListProps } from "./types";
 import { Box, Button, Grid, Typography } from "@mui/material";
-import ColorBreakdownChart from "./ColorBreakdownChart";
-import ManaValueChart from "./ManaValueChart";
-import CardTypeBarChart from "./CardTypeChart";
+
 
 const DeckList: React.FC<DeckListProps> = ({ cards, onRemoveCard, totalCards }) => {
 
@@ -29,11 +27,11 @@ const DeckList: React.FC<DeckListProps> = ({ cards, onRemoveCard, totalCards }) 
                 </Button>
             </Typography>
             <Typography variant="subtitle1">Total cards: {totalCards}</Typography>
-            <Box mb={3} display="flex" justifyContent="space-evenly">
+            {/* <Box mb={3} display="flex" justifyContent="space-evenly">
                 <ColorBreakdownChart cards={cards} />
                 <ManaValueChart cards={cards} />
             </Box>
-            <CardTypeBarChart cards={cards} /> 
+            <CardTypeBarChart cards={cards} />  */}
             <Grid container spacing={2}>
                 {cards.map((card, index) => (
                     <Grid item xs={6} sm={4} md={3} lg={2} key={index}>
